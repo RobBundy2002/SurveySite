@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Georgia Tech Emoji Sentiment Study</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #FFC72C;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .gold { background-color: #FFC72C; color: black; }
+        .red { background-color: #AA0000; color: white; }
+        .green { background-color: #008000; color: white; }
+        .gray { background-color: #555; color: white; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="start">
+        <h1>GEORGIA TECH EMOJI SENTIMENT STUDY</h1>
+        <h2>Hosted by Rob Bundy</h2>
+        <p>Enter Participant ID:</p>
+        <input id="pid" type="text" style="padding:8px;font-size:16px;">
+        <br><br>
+        <button class="gold" onclick="goConsent()">Begin Study</button>
+    </div>
+
+    <div id="consent" class="hidden">
+        <h1>Informed Consent</h1>
+        <p>
+            Participation is voluntary.<br>
+            You may withdraw at any time.<br>
+            Responses are anonymous.
+        </p>
+        <button class="gold" onclick="startSurvey()">I Agree</button>
+    </div>
+
+    <div id="survey" class="hidden">
+        <h2 id="progress"></h2>
+        <p id="question" style="font-size:20px;"></p>
+
+        <button class="gold" onclick="selectResponse('positive')">Positive 👍</button>
+        <button class="red" onclick="selectResponse('negative')">Negative 👎</button>
+
+        <div>
+            <p>Confidence (1–5)</p>
+            <div id="confidence"></div>
+        </div>
+
+        <button class="green" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <div id="finish" class="hidden">
+        <h1>Thank You!</h1>
+        <p>Your responses have been downloaded.</p>
+    </div>
+
+</div>
+
+<script>
+
+    let questions = [
+        { text:"I just got promoted at work and I couldn’t be happier! 🎉", category:"positive"},
+        { text:"Today has been absolutely amazing and everything is going my way! 😄", category:"positive"},
+        { text:"I failed an important exam and I feel terrible about it. 😞", category:"negative"},
+        { text:"Everything that could go wrong today has gone wrong. 💔", category:"negative"},
+        { text:"I’m having a great day… I think. 😕", category:"ambiguous"},
+        { text:"Best day ever 😑", category:"ambiguous"},
+        { text:"I love when this happens 🙃", category:"ambiguous"},
+        { text:"I just adopted a puppy and I’m so excited! 🐶", category:"positive"},
+        { text:"I regret the decision I made earlier today. 😣", category:"negative"},
+        { text:"I guess things could be worse 🤷", category:"ambiguous"}
+    ];
+
+    // duplicate until 30 for demo
+    while (questions.length < 30) {
+        questions = questions.concat(questions.slice(0, 30 - questions.length));
+    }
+
+    questions.sort(() => Math.random() - 0.5);
+
+    let current = 0;
+    let responses = [];
+    let selected = null;
+    let confidence = null;
+    let startTime = null;
+    let participantID = "";
+
+    function goConsent(){
+        participantID = document.getElementById("pid").value;
+        if(!participantID){ alert("Enter Participant ID"); return; }
+        document.getElementById("start").classList.add("hidden");
+        document.getElementById("consent").classList.remove("hidden");
+    }
+
+    function startSurvey(){
+        document.getElementById("consent").classList.add("hidden");
+        document.getElementById("survey").classList.remove("hidden");
+        showQuestion();
+    }
+
+    function showQuestion(){
+        selected = null;
+        confidence = null;
+        startTime = Date.now();
+
+        document.getElementById("progress").innerText =
+            "Question " + (current+1) + " of " + questions.length;
+
+        document.getElementById("question").innerText =
+            questions[current].text;
+
+        let confDiv = document.getElementById("confidence");
+        confDiv.innerHTML = "";
+        for(let i=1;i<=5;i++){
+            let btn = document.createElement("button");
+            btn.innerText = i;
+            btn.className = "gray";
+            btn.onclick = () => { confidence = i; highlightConfidence(i); };
+            confDiv.appendChild(btn);
+        }
+    }
+
+    function highlightConfidence(val){
+        let buttons = document.getElementById("confidence").children;
+        for(let i=0;i<buttons.length;i++){
+            buttons[i].style.backgroundColor =
+                (i+1===val) ? "#FFD700" : "#555";
+        }
+    }
+
+    function selectResponse(resp){
+        selected = resp;
+    }
+
+    function nextQuestion(){
+        if(!selected){ alert("Select Positive or Negative"); return; }
+        if(!confidence){ alert("Select Confidence"); return; }
+
+        let rt = (Date.now() - startTime)/1000;
+
+        responses.push({
+            participant_id: participantID,
+            question_number: current+1,
+            question_text: questions[current].text,
+            question_category: questions[current].category,
+            response: selected,
+            confidence: confidence,
+            reaction_time_seconds: rt,
+            timestamp: new Date().toISOString()
+        });
+
+        current++;
+        if(current < questions.length){
+            showQuestion();
+        } else {
+            finish();
+        }
+    }
+
+    function finish(){
+        let blob = new Blob([JSON.stringify(responses,null,4)],
+            {type:"application/json"});
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "responses_" + participantID + ".json";
+        a.click();
+
+        document.getElementById("survey").classList.add("hidden");
+        document.getElementById("finish").classList.remove("hidden");
+    }
+
+</script>
+
+</body>
+</html>
