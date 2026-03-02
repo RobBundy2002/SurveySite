@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Georgia Tech Emoji Sentiment Study</title>
+
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #000000;
+            background: linear-gradient(135deg, #000000, #1a1a1a);
             color: white;
             display: flex;
             justify-content: center;
@@ -17,21 +18,29 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 850px;
+            width: 100%;
         }
 
         h1 {
             color: #FFC72C;
+            letter-spacing: 2px;
         }
 
         button {
-            padding: 12px 20px;
+            padding: 12px 22px;
             margin: 10px;
             font-size: 16px;
             font-weight: bold;
             border: none;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
         }
 
         .gold { background-color: #FFC72C; color: black; }
@@ -40,8 +49,48 @@
         .gray { background-color: #555; color: white; }
 
         .hidden { display: none; }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #333;
+            border-radius: 15px;
+            margin: 20px 0;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #FFC72C;
+            border-radius: 15px;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            color: black;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px #FFC72C; }
+            50% { box-shadow: 0 0 20px #FFC72C; }
+            100% { box-shadow: 0 0 5px #FFC72C; }
+        }
     </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -50,7 +99,7 @@
         <h1>GEORGIA TECH EMOJI SENTIMENT STUDY</h1>
         <h2>Hosted by Rob Bundy</h2>
         <p>Enter Participant ID:</p>
-        <input id="pid" type="text" style="padding:8px;font-size:16px;">
+        <input id="pid" type="text">
         <br><br>
         <button class="gold" onclick="goConsent()">Begin Study</button>
     </div>
@@ -67,6 +116,11 @@
 
     <div id="survey" class="hidden">
         <h2 id="progress"></h2>
+
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar">0%</div>
+        </div>
+
         <p id="question" style="font-size:20px;"></p>
 
         <button class="gold" onclick="selectResponse('positive')">Positive 👍</button>
@@ -81,7 +135,7 @@
     </div>
 
     <div id="finish" class="hidden">
-        <h1>Thank You!</h1>
+        <h1>Study Complete</h1>
         <p>Your responses have been downloaded.</p>
     </div>
 
@@ -89,25 +143,50 @@
 
 <script>
 
-    let questions = [
-        { text:"I just got promoted at work and I couldn’t be happier! 🎉", category:"positive"},
-        { text:"Today has been absolutely amazing and everything is going my way! 😄", category:"positive"},
-        { text:"I failed an important exam and I feel terrible about it. 😞", category:"negative"},
-        { text:"Everything that could go wrong today has gone wrong. 💔", category:"negative"},
-        { text:"I’m having a great day… I think. 😕", category:"ambiguous"},
-        { text:"Best day ever 😑", category:"ambiguous"},
-        { text:"I love when this happens 🙃", category:"ambiguous"},
-        { text:"I just adopted a puppy and I’m so excited! 🐶", category:"positive"},
-        { text:"I regret the decision I made earlier today. 😣", category:"negative"},
-        { text:"I guess things could be worse 🤷", category:"ambiguous"}
+    // 10 Positive
+    let positive = [
+        "I just received incredible news about my future and I am absolutely thrilled! 😄",
+        "Today has been one of the most fulfilling and joyful days I’ve had in years. 🎉",
+        "I finally achieved something I have been working toward for a very long time! 🏆",
+        "I feel incredibly grateful for the support and kindness around me right now. 😊",
+        "This opportunity couldn’t have come at a better time and I’m beyond excited. ✨",
+        "I’m surrounded by amazing people and couldn’t be happier today. ❤️",
+        "Everything seems to be aligning perfectly in my favor lately! 🌟",
+        "I woke up feeling refreshed, motivated, and optimistic about everything. ☀️",
+        "I just accomplished a major goal and I’m so proud of myself! 💪",
+        "This has honestly been one of the best experiences of my life. 🎊"
     ];
 
-    // duplicate until 30 for demo
-    while (questions.length < 30) {
-        questions = questions.concat(questions.slice(0, 30 - questions.length));
-    }
+    // 10 Negative
+    let negative = [
+        "I completely missed an important deadline and I feel awful about it. 😞",
+        "Today has been frustrating from start to finish and nothing went right. 😠",
+        "I received disappointing news that really ruined my mood. 💔",
+        "I can’t believe how badly things turned out for me today. 😣",
+        "I feel overwhelmed and exhausted by everything happening. 😩",
+        "Something I cared about deeply just fell apart. 😢",
+        "I regret my decision and wish I could undo it. 😔",
+        "I tried my best but still failed miserably. 😞",
+        "This situation has left me feeling defeated and discouraged. 😓",
+        "I feel like everything is working against me right now. 😤"
+    ];
 
-    questions.sort(() => Math.random() - 0.5);
+    // 10 Ambiguous
+    let ambiguous = [
+        "I’m having a great day… I guess. 😑",
+        "Well, that happened… not sure how I feel about it. 🤔",
+        "Things are going surprisingly well, which makes me suspicious. 😅",
+        "I’m smiling, but I’m not entirely convinced it’s genuine. 🙂",
+        "I just got some interesting news and I don’t know what to think. 😶",
+        "This might turn out amazing… or terrible. 🙃",
+        "I’m excited but also extremely nervous at the same time. 😬",
+        "Today has definitely been… something. 😐",
+        "I can’t tell if this is good luck or bad luck. 🤷",
+        "Best day ever. 😒"
+    ];
+
+    let questions = [...positive, ...negative, ...ambiguous];
+    questions = questions.sort(() => Math.random() - 0.5);
 
     let current = 0;
     let responses = [];
@@ -137,8 +216,18 @@
         document.getElementById("progress").innerText =
             "Question " + (current+1) + " of " + questions.length;
 
-        document.getElementById("question").innerText =
-            questions[current].text;
+        let percent = Math.round(((current+1)/questions.length)*100);
+        let bar = document.getElementById("progressBar");
+        bar.style.width = percent + "%";
+        bar.innerText = percent + "%";
+
+        if(current === questions.length-1){
+            bar.classList.add("pulse");
+        } else {
+            bar.classList.remove("pulse");
+        }
+
+        document.getElementById("question").innerText = questions[current];
 
         let confDiv = document.getElementById("confidence");
         confDiv.innerHTML = "";
@@ -146,16 +235,14 @@
             let btn = document.createElement("button");
             btn.innerText = i;
             btn.className = "gray";
-            btn.onclick = () => { confidence = i; highlightConfidence(i); };
+            btn.onclick = () => {
+                confidence = i;
+                for(let b of confDiv.children){
+                    b.style.backgroundColor = "#555";
+                }
+                btn.style.backgroundColor = "#FFC72C";
+            };
             confDiv.appendChild(btn);
-        }
-    }
-
-    function highlightConfidence(val){
-        let buttons = document.getElementById("confidence").children;
-        for(let i=0;i<buttons.length;i++){
-            buttons[i].style.backgroundColor =
-                (i+1===val) ? "#FFD700" : "#555";
         }
     }
 
@@ -172,8 +259,7 @@
         responses.push({
             participant_id: participantID,
             question_number: current+1,
-            question_text: questions[current].text,
-            question_category: questions[current].category,
+            question_text: questions[current],
             response: selected,
             confidence: confidence,
             reaction_time_seconds: rt,
