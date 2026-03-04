@@ -193,6 +193,50 @@
 
 </div>
 <script>
+
+    // ── Answer key ──────────────────────────────────────────────────────────
+    // Each entry: question text (must match exactly) → correct sentiment
+    // Scoring: correct = +confidence pts, wrong = -confidence pts
+    // "control" sentences have no emoji and no strong valence — marked null (not scored)
+    const answerKey = {
+        // CONGRUENT — emoji matches the sentiment clearly
+        "I finally got the research grant I've been stressing over! 🥂":                          "positive",
+        "My laptop just blue-screened in the middle of a 2-hour exam. 💀":                        "negative",
+        "The professor just gave me an extension without me even asking. 😇":                      "positive",
+        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡":         "negative",
+        "Seeing my name on the final graduation list feels so surreal. ✨":                        "positive",
+        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫":              "negative",
+        "Someone just left a huge dent in my car and didn't leave a note. 🤬":                    "negative",
+        "The curve on the midterm was so generous that I actually passed. 😮‍💨":                   "positive",
+        "I just found out my favorite professor is retiring this semester. 💔":                    "negative",
+        "That feeling when you submit the final paper of your degree. 🌊":                         "positive",
+
+        // CONTRADICTORY — emoji contradicts or subverts the literal text; correct = negative
+        "My advisor described my career goals as 'uniquely ambitious.' 🤗":                        "negative",
+        "I just saw my ex and their new 'friend' posted a photo at our spot. ✨":                  "negative",
+        "The TA said my essay was 'certainly one of the papers of all time.' 🥰":                  "negative",
+        "My parents just sent me a link to a 'Life Skills' YouTube playlist. 🌈":                  "negative",
+        "I just realized my internship supervisor is younger than I am. 🥳":                       "negative",
+        "I've been 'studying' with this group for five hours and we haven't opened a book. 📈":    "negative",
+        "My roommate invited their 'long-term guest' to sleep on our couch. 🌟":                   "negative",
+        "I accidentally sent a screenshot of the group chat to the group chat. 💅":               "negative",
+        "Just got assigned a 20-minute presentation on a topic I heard of today. 🥂":              "negative",
+        "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗":                "negative",
+
+        // CONTROL — neutral, no emoji; not scored (null)
+        "The registrar's office sent an automated update regarding my status.":   null,
+        "I am waiting for the department to release the final grades.":           null,
+        "The professor mentioned my contribution during the seminar today.":      null,
+        "I spent the afternoon revising the bibliography for my thesis.":         null,
+        "There is a discrepancy between the lecture notes and the exam.":         null,
+        "My advisor suggested I look into a different elective for next term.":   null,
+        "I am currently re-evaluating the scope of my independent study.":        null,
+        "The library is staying open later during the finals period.":            null,
+        "I received a notification about a change in the course syllabus.":       null,
+        "We are meeting at the student union to discuss the project.":            null,
+    };
+
+    // ── Demo state ───────────────────────────────────────────────────────────
     let demoData = { platforms: [], emojiFrequency: null, textingStyle: null, interpretConfidence: null, sarcasmDetection: null };
 
     function buildScale(containerId, key) {
@@ -240,6 +284,7 @@
         showQuestion();
     }
 
+    // ── Navigation ───────────────────────────────────────────────────────────
     function goConsent() {
         participantID = document.getElementById('pid').value;
         if (!participantID) { alert('Enter Participant ID'); return; }
@@ -252,6 +297,7 @@
         document.getElementById('demo').classList.remove('hidden');
     }
 
+    // ── Questions ────────────────────────────────────────────────────────────
     let congruent = [
         "I finally got the research grant I've been stressing over! 🥂",
         "My laptop just blue-screened in the middle of a 2-hour exam. 💀",
@@ -319,25 +365,93 @@
     function nextQuestion() {
         if (!selected)   { alert('Select Positive or Negative'); return; }
         if (!confidence) { alert('Select Confidence'); return; }
-        let rt = (Date.now() - startTime) / 1000;
+
+        const rt         = (Date.now() - startTime) / 1000;
+        const text       = questions[current];
+        const correct    = answerKey[text];          // "positive" | "negative" | null
+        const isScored   = correct !== null;
+        const isCorrect  = isScored ? (selected === correct) : null;
+
+        // Confidence-weighted scoring:
+        //   correct   → +confidence (1–5)
+        //   wrong     → -confidence (1–5)
+        //   control   → 0 (unscored)
+        const pointsEarned = isScored ? (isCorrect ? confidence : -confidence) : 0;
+
         responses.push({
-            participant_id: participantID,
-            demographics: demoData,
-            question_number: current + 1,
-            question_text: questions[current],
-            response: selected,
-            confidence: confidence,
+            participant_id:        participantID,
+            demographics:          demoData,
+            question_number:       current + 1,
+            question_text:         text,
+            response:              selected,
+            correct_answer:        correct,
+            is_correct:            isCorrect,
+            confidence:            confidence,
+            points_earned:         pointsEarned,
             reaction_time_seconds: rt,
-            timestamp: new Date().toISOString()
+            timestamp:             new Date().toISOString()
         });
+
         current++;
-        current < questions.length ? showQuestion() : finish();
+        if (current < questions.length) {
+            showQuestion();
+        } else {
+            finish();
+        }
     }
 
     function finish() {
-        let blob = new Blob([JSON.stringify(responses, null, 4)], { type: 'application/json' });
+        // ── Aggregate scoring ─────────────────────────────────────────────
+        const scoredResponses = responses.filter(r => r.is_correct !== null);
+        const totalScore      = responses.reduce((sum, r) => sum + r.points_earned, 0);
+        const maxPossible     = scoredResponses.length * 5;   // if every scored Q answered correctly at confidence 5
+        const minPossible     = scoredResponses.length * -5;
+
+        const correctCount    = scoredResponses.filter(r => r.is_correct).length;
+        const incorrectCount  = scoredResponses.filter(r => !r.is_correct).length;
+        const accuracy        = scoredResponses.length > 0
+            ? parseFloat((correctCount / scoredResponses.length * 100).toFixed(1))
+            : 0;
+
+        // Average confidence when correct vs wrong
+        const avgConfCorrect  = correctCount > 0
+            ? parseFloat((scoredResponses.filter(r => r.is_correct).reduce((s,r) => s + r.confidence, 0) / correctCount).toFixed(2))
+            : null;
+        const avgConfWrong    = incorrectCount > 0
+            ? parseFloat((scoredResponses.filter(r => !r.is_correct).reduce((s,r) => s + r.confidence, 0) / incorrectCount).toFixed(2))
+            : null;
+
+        // Calibration: positive = overconfident on errors, negative = underconfident when correct
+        const calibration     = (avgConfWrong !== null && avgConfCorrect !== null)
+            ? parseFloat((avgConfWrong - avgConfCorrect).toFixed(2))
+            : null;
+
+        const summary = {
+            participant_id:              participantID,
+            total_score:                 totalScore,
+            max_possible_score:          maxPossible,
+            min_possible_score:          minPossible,
+            scored_questions:            scoredResponses.length,
+            correct_answers:             correctCount,
+            incorrect_answers:           incorrectCount,
+            unscored_control_questions:  responses.length - scoredResponses.length,
+            accuracy_percent:            accuracy,
+            avg_confidence_when_correct: avgConfCorrect,
+            avg_confidence_when_wrong:   avgConfWrong,
+            calibration_score:           calibration,
+        };
+
+        const output = {
+            summary,
+            responses
+        };
+
+        let blob = new Blob([JSON.stringify(output, null, 4)], { type: 'application/json' });
         let a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = 'responses_' + participantID + '.json'; a.click();
+        a.href = URL.createObjectURL(blob);
+        a.download = 'responses_' + participantID + '.json';
+        a.click();
+
         document.getElementById('survey').classList.add('hidden');
         document.getElementById('finish').classList.remove('hidden');
     }
