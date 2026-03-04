@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Georgia Tech Emoji Sentiment Study</title>
-
     <style>
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -13,124 +13,188 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             text-align: center;
+            padding: 30px 15px;
         }
-
-        .container {
-            max-width: 850px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #FFC72C;
-            letter-spacing: 2px;
-        }
-
+        .container { max-width: 850px; width: 100%; }
+        h1 { color: #FFC72C; letter-spacing: 2px; }
+        h2 { color: #FFC72C; }
         button {
-            padding: 12px 22px;
-            margin: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: transform 0.15s ease, opacity 0.15s ease;
+            padding: 12px 22px; margin: 10px; font-size: 16px;
+            font-weight: bold; border: none; cursor: pointer;
+            border-radius: 8px; transition: transform 0.15s ease, opacity 0.15s ease;
         }
-
-        button:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
-        }
-
-        .gold { background-color: #FFC72C; color: black; }
-        .red { background-color: #AA0000; color: white; }
+        button:hover { transform: scale(1.05); opacity: 0.9; }
+        .gold  { background-color: #FFC72C; color: black; }
+        .red   { background-color: #AA0000; color: white; }
         .green { background-color: #008000; color: white; }
-        .gray { background-color: #555; color: white; }
-
+        .gray  { background-color: #555; color: white; }
         .hidden { display: none; }
-
-        input {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: none;
+        input, select {
+            padding: 10px; font-size: 16px; border-radius: 6px;
+            border: 1px solid #444; background: #2a2a2a;
+            color: white; width: 100%; max-width: 400px;
         }
-
-        /* Progress Bar */
         .progress-container {
-            width: 100%;
-            background-color: #333;
-            border-radius: 15px;
-            margin: 20px 0;
-            height: 25px;
-            overflow: hidden;
+            width: 100%; background-color: #333; border-radius: 15px;
+            margin: 20px 0; height: 25px; overflow: hidden;
         }
-
         .progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: #FFC72C;
-            border-radius: 15px;
-            text-align: center;
-            line-height: 25px;
-            font-weight: bold;
-            color: black;
-            transition: width 0.3s ease-in-out;
+            height: 100%; width: 0%; background-color: #FFC72C;
+            border-radius: 15px; text-align: center; line-height: 25px;
+            font-weight: bold; color: black; transition: width 0.3s ease-in-out;
         }
-
-        .pulse {
-            animation: pulse 1s infinite;
-        }
-
+        .pulse { animation: pulse 1s infinite; }
         @keyframes pulse {
-            0% { box-shadow: 0 0 5px #FFC72C; }
-            50% { box-shadow: 0 0 20px #FFC72C; }
+            0%   { box-shadow: 0 0 5px #FFC72C; }
+            50%  { box-shadow: 0 0 20px #FFC72C; }
             100% { box-shadow: 0 0 5px #FFC72C; }
         }
+        /* Demographic styles */
+        .demo-section {
+            background: #1e1e1e; border: 1px solid #333;
+            border-radius: 12px; padding: 22px 28px;
+            margin: 18px 0; text-align: left;
+        }
+        .demo-section label {
+            display: block; font-weight: bold;
+            color: #FFC72C; margin-bottom: 8px; font-size: 15px;
+        }
+        .demo-section .sublabel {
+            color: #aaa; font-size: 13px; margin-bottom: 10px; display: block;
+        }
+        .scale-row {
+            display: flex; justify-content: center;
+            gap: 10px; flex-wrap: wrap; margin-top: 6px;
+        }
+        .scale-btn {
+            width: 48px; height: 48px; padding: 0; font-size: 15px;
+            border-radius: 8px; background: #555; color: white;
+            border: 2px solid transparent; cursor: pointer;
+            transition: all 0.15s; font-weight: bold;
+        }
+        .scale-btn:hover { transform: scale(1.1); opacity: 0.9; }
+        .scale-btn.selected { background: #FFC72C; color: black; border-color: #e6a800; }
+        .scale-labels {
+            display: flex; justify-content: space-between;
+            font-size: 12px; color: #aaa; margin-top: 5px; padding: 0 4px;
+        }
+        .chip-row {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-top: 8px; justify-content: center;
+        }
+        .chip {
+            padding: 8px 16px; border-radius: 20px; background: #333;
+            color: #ccc; cursor: pointer; border: 2px solid transparent;
+            font-size: 14px; transition: all 0.15s; user-select: none;
+        }
+        .chip:hover { border-color: #FFC72C; color: white; }
+        .chip.selected { background: #FFC72C; color: black; border-color: #e6a800; font-weight: bold; }
+        #demo-error { color: #ff6b6b; font-size: 14px; margin-top: 10px; min-height: 20px; }
     </style>
 </head>
-
 <body>
-
 <div class="container">
 
     <div id="start">
         <h1>GEORGIA TECH EMOJI SENTIMENT STUDY</h1>
         <h2>Hosted by Rob Bundy</h2>
         <p>Enter Participant ID:</p>
-        <input id="pid" type="text">
+        <input id="pid" type="text" placeholder="e.g. GT-001">
         <br><br>
         <button class="gold" onclick="goConsent()">Begin Study</button>
     </div>
 
     <div id="consent" class="hidden">
         <h1>Informed Consent</h1>
-        <p>
-            Participation is voluntary.<br>
-            You may withdraw at any time.<br>
-            Responses are anonymous.
-        </p>
-        <button class="gold" onclick="startSurvey()">I Agree</button>
+        <p>Participation is voluntary.<br>You may withdraw at any time.<br>Responses are anonymous.</p>
+        <button class="gold" onclick="goDemo()">I Agree</button>
+    </div>
+
+    <div id="demo" class="hidden">
+        <h1>Background Information</h1>
+        <p style="color:#aaa; margin-bottom:24px;">Please answer a few quick questions before we begin. All responses are confidential.</p>
+
+        <div class="demo-section">
+            <label>1. How old are you?</label>
+            <input id="demo-age" type="number" min="14" max="99" placeholder="Your age">
+        </div>
+
+        <div class="demo-section">
+            <label>2. How do you identify?</label>
+            <div class="chip-row" id="gender-chips">
+                <div class="chip" onclick="selectChip(this,'gender')">Man</div>
+                <div class="chip" onclick="selectChip(this,'gender')">Woman</div>
+                <div class="chip" onclick="selectChip(this,'gender')">Non-binary</div>
+                <div class="chip" onclick="selectChip(this,'gender')">Self-describe</div>
+                <div class="chip" onclick="selectChip(this,'gender')">Prefer not to say</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <label>3. Which messaging platforms do you use most? <span style="color:#aaa; font-weight:normal;">(select all that apply)</span></label>
+            <div class="chip-row" id="platform-chips">
+                <div class="chip multi" onclick="toggleChip(this)">iMessage / SMS</div>
+                <div class="chip multi" onclick="toggleChip(this)">Instagram DMs</div>
+                <div class="chip multi" onclick="toggleChip(this)">Snapchat</div>
+                <div class="chip multi" onclick="toggleChip(this)">WhatsApp</div>
+                <div class="chip multi" onclick="toggleChip(this)">Discord</div>
+                <div class="chip multi" onclick="toggleChip(this)">Twitter / X DMs</div>
+                <div class="chip multi" onclick="toggleChip(this)">Email</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <label>4. How often do you use emojis when texting?</label>
+            <span class="sublabel">Think about your typical day-to-day messages.</span>
+            <div class="chip-row" id="freq-chips">
+                <div class="chip" onclick="selectChip(this,'freq')">Never</div>
+                <div class="chip" onclick="selectChip(this,'freq')">Rarely</div>
+                <div class="chip" onclick="selectChip(this,'freq')">Sometimes</div>
+                <div class="chip" onclick="selectChip(this,'freq')">Often</div>
+                <div class="chip" onclick="selectChip(this,'freq')">Always</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <label>5. How would you describe your texting style?</label>
+            <div class="chip-row" id="style-chips">
+                <div class="chip" onclick="selectChip(this,'style')">Very casual / slang-heavy</div>
+                <div class="chip" onclick="selectChip(this,'style')">Casual but clear</div>
+                <div class="chip" onclick="selectChip(this,'style')">Neutral / depends on context</div>
+                <div class="chip" onclick="selectChip(this,'style')">Formal and complete sentences</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <label>6. How confident are you in interpreting the <em>intended meaning</em> of emojis from others?</label>
+            <div class="scale-row" id="interp-scale"></div>
+            <div class="scale-labels"><span>Not at all confident</span><span>Extremely confident</span></div>
+        </div>
+
+        <div class="demo-section">
+            <label>7. How good are you at detecting sarcasm or irony in text messages?</label>
+            <div class="scale-row" id="sarcasm-scale"></div>
+            <div class="scale-labels"><span>Very poor</span><span>Excellent</span></div>
+        </div>
+
+        <div id="demo-error"></div>
+        <button class="gold" onclick="submitDemo()">Continue to Study →</button>
     </div>
 
     <div id="survey" class="hidden">
         <h2 id="progress"></h2>
-
         <div class="progress-container">
             <div id="progressBar" class="progress-bar">0%</div>
         </div>
-
         <p id="question" style="font-size:20px;"></p>
-
         <button class="gold" onclick="selectResponse('positive')">Positive 👍</button>
-        <button class="red" onclick="selectResponse('negative')">Negative 👎</button>
-
+        <button class="red"  onclick="selectResponse('negative')">Negative 👎</button>
         <div>
             <p>Confidence (1–5)</p>
             <div id="confidence"></div>
         </div>
-
         <button class="green" onclick="nextQuestion()">Next</button>
     </div>
 
@@ -140,22 +204,80 @@
     </div>
 
 </div>
-
 <script>
+    let demoData = { gender: null, platforms: [], emojiFrequency: null, textingStyle: null, interpretConfidence: null, sarcasmDetection: null };
+
+    function buildScale(containerId, key) {
+        const div = document.getElementById(containerId);
+        for (let i = 1; i <= 7; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'scale-btn';
+            btn.innerText = i;
+            btn.onclick = () => {
+                demoData[key] = i;
+                div.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+            div.appendChild(btn);
+        }
+    }
+    buildScale('interp-scale', 'interpretConfidence');
+    buildScale('sarcasm-scale', 'sarcasmDetection');
+
+    function selectChip(el, group) {
+        document.querySelectorAll('#' + group + '-chips .chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        if (group === 'gender') demoData.gender = el.innerText;
+        if (group === 'freq')   demoData.emojiFrequency = el.innerText;
+        if (group === 'style')  demoData.textingStyle = el.innerText;
+    }
+
+    function toggleChip(el) {
+        el.classList.toggle('selected');
+        demoData.platforms = Array.from(document.querySelectorAll('#platform-chips .chip.selected')).map(c => c.innerText);
+    }
+
+    function submitDemo() {
+        const age = document.getElementById('demo-age').value;
+        const err = document.getElementById('demo-error');
+        if (!age || age < 14 || age > 99)       { err.innerText = '⚠ Please enter a valid age.'; return; }
+        if (!demoData.gender)                    { err.innerText = '⚠ Please select a gender identity option.'; return; }
+        if (!demoData.platforms.length)          { err.innerText = '⚠ Please select at least one platform.'; return; }
+        if (!demoData.emojiFrequency)            { err.innerText = '⚠ Please indicate how often you use emojis.'; return; }
+        if (!demoData.textingStyle)              { err.innerText = '⚠ Please select your texting style.'; return; }
+        if (!demoData.interpretConfidence)       { err.innerText = '⚠ Please rate your emoji interpretation confidence.'; return; }
+        if (!demoData.sarcasmDetection)          { err.innerText = '⚠ Please rate your sarcasm detection.'; return; }
+        err.innerText = '';
+        demoData.age = parseInt(age);
+        document.getElementById('demo').classList.add('hidden');
+        document.getElementById('survey').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function goConsent() {
+        participantID = document.getElementById('pid').value;
+        if (!participantID) { alert('Enter Participant ID'); return; }
+        document.getElementById('start').classList.add('hidden');
+        document.getElementById('consent').classList.remove('hidden');
+    }
+
+    function goDemo() {
+        document.getElementById('consent').classList.add('hidden');
+        document.getElementById('demo').classList.remove('hidden');
+    }
 
     let congruent = [
-        "I finally got the research grant I’ve been stressing over! 🥂",
+        "I finally got the research grant I've been stressing over! 🥂",
         "My laptop just blue-screened in the middle of a 2-hour exam. 💀",
         "The professor just gave me an extension without me even asking. 😇",
-        "I just realized I’ve been muted for the last 10 minutes of my presentation. 🤡",
+        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡",
         "Seeing my name on the final graduation list feels so surreal. ✨",
-        "I’ve had four cups of coffee and I still can't process this textbook. 😵‍💫",
+        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫",
         "Someone just left a huge dent in my car and didn't leave a note. 🤬",
         "The curve on the midterm was so generous that I actually passed. 😮‍💨",
         "I just found out my favorite professor is retiring this semester. 💔",
         "That feeling when you submit the final paper of your degree. 🌊"
     ];
-
     let contradictory = [
         "My advisor described my career goals as 'uniquely ambitious.' 🤗",
         "I just saw my ex and their new 'friend' posted a photo at our spot. ✨",
@@ -168,9 +290,8 @@
         "Just got assigned a 20-minute presentation on a topic I heard of today. 🥂",
         "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗"
     ];
-
     let control = [
-        "The registrar’s office sent an automated update regarding my status.",
+        "The registrar's office sent an automated update regarding my status.",
         "I am waiting for the department to release the final grades.",
         "The professor mentioned my contribution during the seminar today.",
         "I spent the afternoon revising the bibliography for my thesis.",
@@ -182,108 +303,58 @@
         "We are meeting at the student union to discuss the project."
     ];
 
-    let questions = [...congruent, ...contradictory, ...control];
-    questions = questions.sort(() => Math.random() - 0.5);
+    let questions = [...congruent, ...contradictory, ...control].sort(() => Math.random() - 0.5);
+    let current = 0, responses = [], selected = null, confidence = null, startTime = null, participantID = "";
 
-    let current = 0;
-    let responses = [];
-    let selected = null;
-    let confidence = null;
-    let startTime = null;
-    let participantID = "";
-
-    function goConsent(){
-        participantID = document.getElementById("pid").value;
-        if(!participantID){ alert("Enter Participant ID"); return; }
-        document.getElementById("start").classList.add("hidden");
-        document.getElementById("consent").classList.remove("hidden");
-    }
-
-    function startSurvey(){
-        document.getElementById("consent").classList.add("hidden");
-        document.getElementById("survey").classList.remove("hidden");
-        showQuestion();
-    }
-
-    function showQuestion(){
-        selected = null;
-        confidence = null;
-        startTime = Date.now();
-
-        document.getElementById("progress").innerText =
-            "Question " + (current+1) + " of " + questions.length;
-
+    function showQuestion() {
+        selected = null; confidence = null; startTime = Date.now();
+        document.getElementById('progress').innerText = 'Question ' + (current+1) + ' of ' + questions.length;
         let percent = Math.round(((current+1)/questions.length)*100);
-        let bar = document.getElementById("progressBar");
-        bar.style.width = percent + "%";
-        bar.innerText = percent + "%";
-
-        if(current === questions.length-1){
-            bar.classList.add("pulse");
-        } else {
-            bar.classList.remove("pulse");
-        }
-
-        document.getElementById("question").innerText = questions[current];
-
-        let confDiv = document.getElementById("confidence");
-        confDiv.innerHTML = "";
-        for(let i=1;i<=5;i++){
-            let btn = document.createElement("button");
-            btn.innerText = i;
-            btn.className = "gray";
+        let bar = document.getElementById('progressBar');
+        bar.style.width = percent + '%'; bar.innerText = percent + '%';
+        current === questions.length - 1 ? bar.classList.add('pulse') : bar.classList.remove('pulse');
+        document.getElementById('question').innerText = questions[current];
+        let confDiv = document.getElementById('confidence');
+        confDiv.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            let btn = document.createElement('button');
+            btn.innerText = i; btn.className = 'gray';
             btn.onclick = () => {
                 confidence = i;
-                for(let b of confDiv.children){
-                    b.style.backgroundColor = "#555";
-                }
-                btn.style.backgroundColor = "#FFC72C";
+                for (let b of confDiv.children) b.style.backgroundColor = '#555';
+                btn.style.backgroundColor = '#FFC72C';
             };
             confDiv.appendChild(btn);
         }
     }
 
-    function selectResponse(resp){
-        selected = resp;
-    }
+    function selectResponse(resp) { selected = resp; }
 
-    function nextQuestion(){
-        if(!selected){ alert("Select Positive or Negative"); return; }
-        if(!confidence){ alert("Select Confidence"); return; }
-
-        let rt = (Date.now() - startTime)/1000;
-
+    function nextQuestion() {
+        if (!selected)   { alert('Select Positive or Negative'); return; }
+        if (!confidence) { alert('Select Confidence'); return; }
+        let rt = (Date.now() - startTime) / 1000;
         responses.push({
             participant_id: participantID,
-            question_number: current+1,
+            demographics: demoData,
+            question_number: current + 1,
             question_text: questions[current],
             response: selected,
             confidence: confidence,
             reaction_time_seconds: rt,
             timestamp: new Date().toISOString()
         });
-
         current++;
-        if(current < questions.length){
-            showQuestion();
-        } else {
-            finish();
-        }
+        current < questions.length ? showQuestion() : finish();
     }
 
-    function finish(){
-        let blob = new Blob([JSON.stringify(responses,null,4)],
-            {type:"application/json"});
-        let a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "responses_" + participantID + ".json";
-        a.click();
-
-        document.getElementById("survey").classList.add("hidden");
-        document.getElementById("finish").classList.remove("hidden");
+    function finish() {
+        let blob = new Blob([JSON.stringify(responses, null, 4)], { type: 'application/json' });
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'responses_' + participantID + '.json'; a.click();
+        document.getElementById('survey').classList.add('hidden');
+        document.getElementById('finish').classList.remove('hidden');
     }
-
 </script>
-
 </body>
 </html>
