@@ -143,49 +143,46 @@
 
 <script>
 
-    // 10 Positive
-    let positive = [
-        "I just received incredible news about my future and I am absolutely thrilled! 😄",
-        "Today has been one of the most fulfilling and joyful days I’ve had in years. 🎉",
-        "I finally achieved something I have been working toward for a very long time! 🏆",
-        "I feel incredibly grateful for the support and kindness around me right now. 😊",
-        "This opportunity couldn’t have come at a better time and I’m beyond excited. ✨",
-        "I’m surrounded by amazing people and couldn’t be happier today. ❤️",
-        "Everything seems to be aligning perfectly in my favor lately! 🌟",
-        "I woke up feeling refreshed, motivated, and optimistic about everything. ☀️",
-        "I just accomplished a major goal and I’m so proud of myself! 💪",
-        "This has honestly been one of the best experiences of my life. 🎊"
+    let congruent = [
+        "I finally got the research grant I’ve been stressing over! 🥂",
+        "My laptop just blue-screened in the middle of a 2-hour exam. 💀",
+        "The professor just gave me an extension without me even asking. 😇",
+        "I just realized I’ve been muted for the last 10 minutes of my presentation. 🤡",
+        "Seeing my name on the final graduation list feels so surreal. ✨",
+        "I’ve had four cups of coffee and I still can't process this textbook. 😵‍💫",
+        "Someone just left a huge dent in my car and didn't leave a note. 🤬",
+        "The curve on the midterm was so generous that I actually passed. 😮‍💨",
+        "I just found out my favorite professor is retiring this semester. 💔",
+        "That feeling when you submit the final paper of your degree. 🌊"
     ];
 
-    // 10 Negative
-    let negative = [
-        "I completely missed an important deadline and I feel awful about it. 😞",
-        "Today has been frustrating from start to finish and nothing went right. 😠",
-        "I received disappointing news that really ruined my mood. 💔",
-        "I can’t believe how badly things turned out for me today. 😣",
-        "I feel overwhelmed and exhausted by everything happening. 😩",
-        "Something I cared about deeply just fell apart. 😢",
-        "I regret my decision and wish I could undo it. 😔",
-        "I tried my best but still failed miserably. 😞",
-        "This situation has left me feeling defeated and discouraged. 😓",
-        "I feel like everything is working against me right now. 😤"
+    let contradictory = [
+        "My advisor described my career goals as 'uniquely ambitious.' 🤗",
+        "I just saw my ex and their new 'friend' posted a photo at our spot. ✨",
+        "The TA said my essay was 'certainly one of the papers of all time.' 🥰",
+        "My parents just sent me a link to a 'Life Skills' YouTube playlist. 🌈",
+        "I just realized my internship supervisor is younger than I am. 🥳",
+        "I've been 'studying' with this group for five hours and we haven't opened a book. 📈",
+        "My roommate invited their 'long-term guest' to sleep on our couch. 🌟",
+        "I accidentally sent a screenshot of the group chat to the group chat. 💅",
+        "Just got assigned a 20-minute presentation on a topic I heard of today. 🥂",
+        "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗"
     ];
 
-    // 10 Ambiguous
-    let ambiguous = [
-        "I’m having a great day… I guess. 😑",
-        "Well, that happened… not sure how I feel about it. 🤔",
-        "Things are going surprisingly well, which makes me suspicious. 😅",
-        "I’m smiling, but I’m not entirely convinced it’s genuine. 🙂",
-        "I just got some interesting news and I don’t know what to think. 😶",
-        "This might turn out amazing… or terrible. 🙃",
-        "I’m excited but also extremely nervous at the same time. 😬",
-        "Today has definitely been… something. 😐",
-        "I can’t tell if this is good luck or bad luck. 🤷",
-        "Best day ever. 😒"
+    let control = [
+        "The registrar’s office sent an automated update regarding my status.",
+        "I am waiting for the department to release the final grades.",
+        "The professor mentioned my contribution during the seminar today.",
+        "I spent the afternoon revising the bibliography for my thesis.",
+        "There is a discrepancy between the lecture notes and the exam.",
+        "My advisor suggested I look into a different elective for next term.",
+        "I am currently re-evaluating the scope of my independent study.",
+        "The library is staying open later during the finals period.",
+        "I received a notification about a change in the course syllabus.",
+        "We are meeting at the student union to discuss the project."
     ];
 
-    let questions = [...positive, ...negative, ...ambiguous];
+    let questions = [...congruent, ...contradictory, ...control];
     questions = questions.sort(() => Math.random() - 0.5);
 
     let current = 0;
