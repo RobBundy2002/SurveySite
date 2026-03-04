@@ -51,7 +51,6 @@
             50%  { box-shadow: 0 0 20px #FFC72C; }
             100% { box-shadow: 0 0 5px #FFC72C; }
         }
-        /* Demographic styles */
         .demo-section {
             background: #1e1e1e; border: 1px solid #333;
             border-radius: 12px; padding: 22px 28px;
@@ -122,18 +121,7 @@
         </div>
 
         <div class="demo-section">
-            <label>2. How do you identify?</label>
-            <div class="chip-row" id="gender-chips">
-                <div class="chip" onclick="selectChip(this,'gender')">Man</div>
-                <div class="chip" onclick="selectChip(this,'gender')">Woman</div>
-                <div class="chip" onclick="selectChip(this,'gender')">Non-binary</div>
-                <div class="chip" onclick="selectChip(this,'gender')">Self-describe</div>
-                <div class="chip" onclick="selectChip(this,'gender')">Prefer not to say</div>
-            </div>
-        </div>
-
-        <div class="demo-section">
-            <label>3. Which messaging platforms do you use most? <span style="color:#aaa; font-weight:normal;">(select all that apply)</span></label>
+            <label>2. Which messaging platforms do you use most? <span style="color:#aaa; font-weight:normal;">(select all that apply)</span></label>
             <div class="chip-row" id="platform-chips">
                 <div class="chip multi" onclick="toggleChip(this)">iMessage / SMS</div>
                 <div class="chip multi" onclick="toggleChip(this)">Instagram DMs</div>
@@ -146,7 +134,7 @@
         </div>
 
         <div class="demo-section">
-            <label>4. How often do you use emojis when texting?</label>
+            <label>3. How often do you use emojis when texting?</label>
             <span class="sublabel">Think about your typical day-to-day messages.</span>
             <div class="chip-row" id="freq-chips">
                 <div class="chip" onclick="selectChip(this,'freq')">Never</div>
@@ -158,7 +146,7 @@
         </div>
 
         <div class="demo-section">
-            <label>5. How would you describe your texting style?</label>
+            <label>4. How would you describe your texting style?</label>
             <div class="chip-row" id="style-chips">
                 <div class="chip" onclick="selectChip(this,'style')">Very casual / slang-heavy</div>
                 <div class="chip" onclick="selectChip(this,'style')">Casual but clear</div>
@@ -168,13 +156,13 @@
         </div>
 
         <div class="demo-section">
-            <label>6. How confident are you in interpreting the <em>intended meaning</em> of emojis from others?</label>
+            <label>5. How confident are you in interpreting the <em>intended meaning</em> of emojis from others?</label>
             <div class="scale-row" id="interp-scale"></div>
             <div class="scale-labels"><span>Not at all confident</span><span>Extremely confident</span></div>
         </div>
 
         <div class="demo-section">
-            <label>7. How good are you at detecting sarcasm or irony in text messages?</label>
+            <label>6. How good are you at detecting sarcasm or irony in text messages?</label>
             <div class="scale-row" id="sarcasm-scale"></div>
             <div class="scale-labels"><span>Very poor</span><span>Excellent</span></div>
         </div>
@@ -205,7 +193,7 @@
 
 </div>
 <script>
-    let demoData = { gender: null, platforms: [], emojiFrequency: null, textingStyle: null, interpretConfidence: null, sarcasmDetection: null };
+    let demoData = { platforms: [], emojiFrequency: null, textingStyle: null, interpretConfidence: null, sarcasmDetection: null };
 
     function buildScale(containerId, key) {
         const div = document.getElementById(containerId);
@@ -227,9 +215,8 @@
     function selectChip(el, group) {
         document.querySelectorAll('#' + group + '-chips .chip').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        if (group === 'gender') demoData.gender = el.innerText;
-        if (group === 'freq')   demoData.emojiFrequency = el.innerText;
-        if (group === 'style')  demoData.textingStyle = el.innerText;
+        if (group === 'freq')  demoData.emojiFrequency = el.innerText;
+        if (group === 'style') demoData.textingStyle = el.innerText;
     }
 
     function toggleChip(el) {
@@ -240,13 +227,12 @@
     function submitDemo() {
         const age = document.getElementById('demo-age').value;
         const err = document.getElementById('demo-error');
-        if (!age || age < 14 || age > 99)       { err.innerText = '⚠ Please enter a valid age.'; return; }
-        if (!demoData.gender)                    { err.innerText = '⚠ Please select a gender identity option.'; return; }
-        if (!demoData.platforms.length)          { err.innerText = '⚠ Please select at least one platform.'; return; }
-        if (!demoData.emojiFrequency)            { err.innerText = '⚠ Please indicate how often you use emojis.'; return; }
-        if (!demoData.textingStyle)              { err.innerText = '⚠ Please select your texting style.'; return; }
-        if (!demoData.interpretConfidence)       { err.innerText = '⚠ Please rate your emoji interpretation confidence.'; return; }
-        if (!demoData.sarcasmDetection)          { err.innerText = '⚠ Please rate your sarcasm detection.'; return; }
+        if (!age || age < 14 || age > 99)  { err.innerText = '⚠ Please enter a valid age.'; return; }
+        if (!demoData.platforms.length)    { err.innerText = '⚠ Please select at least one platform.'; return; }
+        if (!demoData.emojiFrequency)      { err.innerText = '⚠ Please indicate how often you use emojis.'; return; }
+        if (!demoData.textingStyle)        { err.innerText = '⚠ Please select your texting style.'; return; }
+        if (!demoData.interpretConfidence) { err.innerText = '⚠ Please rate your emoji interpretation confidence.'; return; }
+        if (!demoData.sarcasmDetection)    { err.innerText = '⚠ Please rate your sarcasm detection.'; return; }
         err.innerText = '';
         demoData.age = parseInt(age);
         document.getElementById('demo').classList.add('hidden');
