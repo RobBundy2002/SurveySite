@@ -111,8 +111,6 @@
         <button class="gold" onclick="goDemo()">I Agree</button>
     </div>
 
-    <!-- FIX 1: Added interp-scale and sarcasm-scale sections to the HTML
-         so that buildScale() has actual DOM elements to append buttons into. -->
     <div id="demo" class="hidden">
         <h1>Background Information</h1>
         <p style="color:#aaa; margin-bottom:24px;">Please answer a few quick questions before we begin. All responses are confidential.</p>
@@ -211,7 +209,7 @@
         "I just found out my favorite professor is retiring this semester. 💔":                    "negative",
         "That feeling when you submit the final paper of your degree. 🌊":                         "positive",
 
-        // CONTRADICTORY
+        // CONTRADICTORY — correct answer is always the TEXT's intended valence (negative)
         "My advisor described my career goals as 'uniquely ambitious.' 🤗":                        "positive",
         "I just saw my ex and their new 'friend' posted a photo at our spot. ✨":                  "negative",
         "The TA said my essay was 'certainly one of the papers of all time.' 🥰":                  "negative",
@@ -223,24 +221,19 @@
         "Just got assigned a 20-minute presentation on a topic I heard of today. 🥂":              "negative",
         "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗":                "positive",
 
-        // CONTROL
-        "The registrar's office sent an automated update regarding my status.":   null,
-        "I am waiting for the department to release the final grades.":           null,
-        "The professor mentioned my contribution during the seminar today.":      null,
-        "I spent the afternoon revising the bibliography for my thesis.":         null,
-        "There is a discrepancy between the lecture notes and the exam.":         null,
-        "My advisor suggested I look into a different elective for next term.":   null,
-        "I am currently re-evaluating the scope of my independent study.":        null,
-        "The library is staying open later during the finals period.":            null,
-        "I received a notification about a change in the course syllabus.":       null,
-        "We are meeting at the student union to discuss the project.":            null,
+        // CONTROL — now scored, 5 positive / 5 negative, no emoji
+        "I passed all four of my finals and finished the semester with a 3.9 GPA.":               "positive",
+        "The professor pulled me aside to say my essay was the best she had read all year.":       "positive",
+        "I got into the graduate program I applied to on my first try.":                           "positive",
+        "My research paper was accepted for publication in the department journal.":               "positive",
+        "I found out I received a full scholarship for my final year of school.":                  "positive",
+        "I failed the midterm by fifteen points and it dropped my grade to a D.":                  "negative",
+        "My laptop crashed the night before my thesis was due and I lost everything I had not backed up.": "negative",
+        "I was dropped from the course due to an administrative error and lost my spot permanently.": "negative",
+        "I studied for the wrong exam and had nothing to write for the first hour of the test.":   "negative",
+        "My group submitted the project without my section and I received a zero for the assignment.": "negative",
     };
 
-    // ── FIX 2: Declare all variables at the top of the script so they are
-    //   fully initialized before any function (including goConsent) runs.
-    //   Previously, participantID was declared in the middle of the script
-    //   with let, causing a temporal dead zone error when goConsent() tried
-    //   to assign to it before that line was reached. ──────────────────────
     let participantID = "";
     let current = 0;
     let responses = [];
@@ -265,7 +258,6 @@
             div.appendChild(btn);
         }
     }
-    // These calls now succeed because interp-scale and sarcasm-scale exist in the HTML above.
     buildScale('interp-scale', 'interpretConfidence');
     buildScale('sarcasm-scale', 'sarcasmDetection');
 
@@ -336,16 +328,16 @@
         "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗"
     ];
     let control = [
-        "The registrar's office sent an automated update regarding my status.",
-        "I am waiting for the department to release the final grades.",
-        "The professor mentioned my contribution during the seminar today.",
-        "I spent the afternoon revising the bibliography for my thesis.",
-        "There is a discrepancy between the lecture notes and the exam.",
-        "My advisor suggested I look into a different elective for next term.",
-        "I am currently re-evaluating the scope of my independent study.",
-        "The library is staying open later during the finals period.",
-        "I received a notification about a change in the course syllabus.",
-        "We are meeting at the student union to discuss the project."
+        "I passed all four of my finals and finished the semester with a 3.9 GPA.",
+        "The professor pulled me aside to say my essay was the best she had read all year.",
+        "I got into the graduate program I applied to on my first try.",
+        "My research paper was accepted for publication in the department journal.",
+        "I found out I received a full scholarship for my final year of school.",
+        "I failed the midterm by fifteen points and it dropped my grade to a D.",
+        "My laptop crashed the night before my thesis was due and I lost everything I had not backed up.",
+        "I was dropped from the course due to an administrative error and lost my spot permanently.",
+        "I studied for the wrong exam and had nothing to write for the first hour of the test.",
+        "My group submitted the project without my section and I received a zero for the assignment."
     ];
 
     let questions = [...congruent, ...contradictory, ...control].sort(() => Math.random() - 0.5);
@@ -378,11 +370,11 @@
         if (!selected)   { alert('Select Positive or Negative'); return; }
         if (!confidence) { alert('Select Confidence'); return; }
 
-        const rt         = (Date.now() - startTime) / 1000;
-        const text       = questions[current];
-        const correct    = answerKey[text];
-        const isScored   = correct !== null;
-        const isCorrect  = isScored ? (selected === correct) : null;
+        const rt           = (Date.now() - startTime) / 1000;
+        const text         = questions[current];
+        const correct      = answerKey[text];
+        const isScored     = correct !== undefined && correct !== null;
+        const isCorrect    = isScored ? (selected === correct) : null;
         const pointsEarned = isScored ? (isCorrect ? confidence : -confidence) : 0;
 
         responses.push({
@@ -391,7 +383,7 @@
             question_number:       current + 1,
             question_text:         text,
             response:              selected,
-            correct_answer:        correct,
+            correct_answer:        correct ?? null,
             is_correct:            isCorrect,
             confidence:            confidence,
             points_earned:         pointsEarned,
