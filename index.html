@@ -111,6 +111,8 @@
         <button class="gold" onclick="goDemo()">I Agree</button>
     </div>
 
+    <!-- FIX 1: Added interp-scale and sarcasm-scale sections to the HTML
+         so that buildScale() has actual DOM elements to append buttons into. -->
     <div id="demo" class="hidden">
         <h1>Background Information</h1>
         <p style="color:#aaa; margin-bottom:24px;">Please answer a few quick questions before we begin. All responses are confidential.</p>
@@ -154,6 +156,19 @@
                 <div class="chip" onclick="selectChip(this,'style')">Formal and complete sentences</div>
             </div>
         </div>
+
+        <div class="demo-section">
+            <label>5. How confident are you in interpreting emoji meaning? <span style="color:#aaa; font-weight:normal;">(1 = not at all, 7 = extremely)</span></label>
+            <div class="scale-row" id="interp-scale"></div>
+            <div class="scale-labels"><span>Not at all</span><span>Extremely</span></div>
+        </div>
+
+        <div class="demo-section">
+            <label>6. How good are you at detecting sarcasm in text? <span style="color:#aaa; font-weight:normal;">(1 = not at all, 7 = extremely)</span></label>
+            <div class="scale-row" id="sarcasm-scale"></div>
+            <div class="scale-labels"><span>Not at all</span><span>Extremely</span></div>
+        </div>
+
         <div id="demo-error"></div>
         <button class="gold" onclick="submitDemo()">Continue to Study →</button>
     </div>
@@ -182,11 +197,8 @@
 <script>
 
     // ── Answer key ──────────────────────────────────────────────────────────
-    // Each entry: question text (must match exactly) → correct sentiment
-    // Scoring: correct = +confidence pts, wrong = -confidence pts
-    // "control" sentences have no emoji and no strong valence — marked null (not scored)
     const answerKey = {
-        // CONGRUENT — emoji matches the sentiment clearly
+        // CONGRUENT
         "I finally got the research grant I've been stressing over! 🥂":                          "positive",
         "My laptop just blue-screened in the middle of a 2-hour exam. 💀":                        "negative",
         "The professor just gave me an extension without me even asking. 😇":                      "positive",
@@ -198,7 +210,7 @@
         "I just found out my favorite professor is retiring this semester. 💔":                    "negative",
         "That feeling when you submit the final paper of your degree. 🌊":                         "positive",
 
-        // CONTRADICTORY — emoji contradicts or subverts the literal text; correct = negative
+        // CONTRADICTORY
         "My advisor described my career goals as 'uniquely ambitious.' 🤗":                        "negative",
         "I just saw my ex and their new 'friend' posted a photo at our spot. ✨":                  "negative",
         "The TA said my essay was 'certainly one of the papers of all time.' 🥰":                  "negative",
@@ -210,7 +222,7 @@
         "Just got assigned a 20-minute presentation on a topic I heard of today. 🥂":              "negative",
         "I haven't checked my GPA in three semesters and I'm doing just fine. 🤗":                "negative",
 
-        // CONTROL — neutral, no emoji; not scored (null)
+        // CONTROL
         "The registrar's office sent an automated update regarding my status.":   null,
         "I am waiting for the department to release the final grades.":           null,
         "The professor mentioned my contribution during the seminar today.":      null,
@@ -222,6 +234,18 @@
         "I received a notification about a change in the course syllabus.":       null,
         "We are meeting at the student union to discuss the project.":            null,
     };
+
+    // ── FIX 2: Declare all variables at the top of the script so they are
+    //   fully initialized before any function (including goConsent) runs.
+    //   Previously, participantID was declared in the middle of the script
+    //   with let, causing a temporal dead zone error when goConsent() tried
+    //   to assign to it before that line was reached. ──────────────────────
+    let participantID = "";
+    let current = 0;
+    let responses = [];
+    let selected = null;
+    let confidence = null;
+    let startTime = null;
 
     // ── Demo state ───────────────────────────────────────────────────────────
     let demoData = { platforms: [], emojiFrequency: null, textingStyle: null, interpretConfidence: null, sarcasmDetection: null };
@@ -240,6 +264,7 @@
             div.appendChild(btn);
         }
     }
+    // These calls now succeed because interp-scale and sarcasm-scale exist in the HTML above.
     buildScale('interp-scale', 'interpretConfidence');
     buildScale('sarcasm-scale', 'sarcasmDetection');
 
@@ -323,7 +348,6 @@
     ];
 
     let questions = [...congruent, ...contradictory, ...control].sort(() => Math.random() - 0.5);
-    let current = 0, responses = [], selected = null, confidence = null, startTime = null, participantID = "";
 
     function showQuestion() {
         selected = null; confidence = null; startTime = Date.now();
@@ -355,14 +379,9 @@
 
         const rt         = (Date.now() - startTime) / 1000;
         const text       = questions[current];
-        const correct    = answerKey[text];          // "positive" | "negative" | null
+        const correct    = answerKey[text];
         const isScored   = correct !== null;
         const isCorrect  = isScored ? (selected === correct) : null;
-
-        // Confidence-weighted scoring:
-        //   correct   → +confidence (1–5)
-        //   wrong     → -confidence (1–5)
-        //   control   → 0 (unscored)
         const pointsEarned = isScored ? (isCorrect ? confidence : -confidence) : 0;
 
         responses.push({
@@ -388,10 +407,9 @@
     }
 
     function finish() {
-        // ── Aggregate scoring ─────────────────────────────────────────────
         const scoredResponses = responses.filter(r => r.is_correct !== null);
         const totalScore      = responses.reduce((sum, r) => sum + r.points_earned, 0);
-        const maxPossible     = scoredResponses.length * 5;   // if every scored Q answered correctly at confidence 5
+        const maxPossible     = scoredResponses.length * 5;
         const minPossible     = scoredResponses.length * -5;
 
         const correctCount    = scoredResponses.filter(r => r.is_correct).length;
@@ -400,7 +418,6 @@
             ? parseFloat((correctCount / scoredResponses.length * 100).toFixed(1))
             : 0;
 
-        // Average confidence when correct vs wrong
         const avgConfCorrect  = correctCount > 0
             ? parseFloat((scoredResponses.filter(r => r.is_correct).reduce((s,r) => s + r.confidence, 0) / correctCount).toFixed(2))
             : null;
@@ -408,7 +425,6 @@
             ? parseFloat((scoredResponses.filter(r => !r.is_correct).reduce((s,r) => s + r.confidence, 0) / incorrectCount).toFixed(2))
             : null;
 
-        // Calibration: positive = overconfident on errors, negative = underconfident when correct
         const calibration     = (avgConfWrong !== null && avgConfCorrect !== null)
             ? parseFloat((avgConfWrong - avgConfCorrect).toFixed(2))
             : null;
@@ -428,10 +444,7 @@
             calibration_score:           calibration,
         };
 
-        const output = {
-            summary,
-            responses
-        };
+        const output = { summary, responses };
 
         let blob = new Blob([JSON.stringify(output, null, 4)], { type: 'application/json' });
         let a = document.createElement('a');
