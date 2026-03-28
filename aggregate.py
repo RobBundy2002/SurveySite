@@ -48,6 +48,25 @@ CONTROL = {
     "My group submitted the project without my section and I received a zero for the assignment.",
 }
 
+CONTROL_POSITIVE = {
+    "I passed all four of my finals and finished the semester with a 3.9 GPA.",
+    "The professor pulled me aside to say my essay was the best she had read all year.",
+    "I got into the graduate program I applied to on my first try.",
+    "My research paper was accepted for publication in the department journal.",
+    "I found out I received a full scholarship for my final year of school.",
+}
+
+CONTROL_NEGATIVE = {
+    "I failed the midterm by fifteen points and it dropped my grade to a D.",
+    "My laptop crashed the night before my thesis was due and I lost everything I had not backed up.",
+    "I was dropped from the course due to an administrative error and lost my spot permanently.",
+    "I studied for the wrong exam and had nothing to write for the first hour of the test.",
+    "My group submitted the project without my section and I received a zero for the assignment.",
+}
+
+CONTROL_ANSWERS = {q: "positive" for q in CONTROL_POSITIVE}
+CONTROL_ANSWERS.update({q: "negative" for q in CONTROL_NEGATIVE})
+
 def get_condition(r):
     t = r.get("question_text", "")
     if t in CONGRUENT:      return "Congruent"
@@ -98,6 +117,21 @@ def acc(lst):
     s = [r for r in lst if r["is_correct"] is not None]
     return (sum(r["is_correct"] for r in s) / len(s) * 100) if s else 0
 
+def control_accuracy(lst):
+    scored = []
+
+    for r in lst:
+        q = r.get("question_text")
+        correct = CONTROL_ANSWERS.get(q)
+
+        if correct is not None:
+            scored.append(r["response"] == correct)
+
+    if not scored:
+        return 0
+
+    return (sum(scored) / len(scored)) * 100
+
 def mean_rt(lst):
     return np.mean([r["reaction_time_seconds"] for r in lst]) if lst else 0
 
@@ -110,10 +144,28 @@ cond_lists = {c: by_cond(c) for c in conds}
 # Per-participant accuracy by condition
 def per_participant_acc(cond):
     result = []
+
     for p in participants:
-        pid  = p["id"]
-        lst  = [r for r in cond_lists[cond] if r["participant_id"] == pid and r["is_correct"] is not None]
-        result.append(acc(lst))
+        pid = p["id"]
+        lst = [r for r in cond_lists[cond] if r["participant_id"] == pid]
+
+        scored = []
+
+        for r in lst:
+            if cond == "Control":
+                q = r.get("question_text")
+                correct = CONTROL_ANSWERS.get(q)
+                if correct is not None:
+                    scored.append(r["response"] == correct)
+            else:
+                if r.get("correct_answer") is not None:
+                    scored.append(r["response"] == r["correct_answer"])
+
+        if not scored:
+            result.append(0)
+        else:
+            result.append((sum(scored) / len(scored)) * 100)
+
     return result
 
 # Direction of errors in contradictory condition
@@ -216,7 +268,10 @@ for i, (label, value, color) in enumerate(cards):
 
 # ── Row 1, col 0: Accuracy by condition (group means + individual dots) ───────
 ax1 = fig.add_subplot(gs[1, 0])
-accs   = [acc(cond_lists[c]) for c in conds]
+accs = [
+    acc(cond_lists[c]) if c != "Control" else control_accuracy(cond_lists[c])
+    for c in conds
+]
 colors = [COND_COLORS[c] for c in conds]
 bars   = ax1.bar(conds, accs, color=colors, edgecolor="#555", linewidth=0.8, width=0.5, zorder=2)
 for bar, v in zip(bars, accs):
