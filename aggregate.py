@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy import stats
 
-# ── Condition mappings (sourced from study HTML) ──────────────────────────────
+# ── Condition mappings ──────────────────────────────
 
 CONGRUENT = {
     "I finally got the research grant I've been stressing over! 🥂",
@@ -72,7 +72,6 @@ def get_condition(r):
     if t in CONGRUENT:      return "Congruent"
     if t in CONTRADICTORY:  return "Contradictory"
     if t in CONTROL:        return "Control"
-    # fallback: use correct_answer nullness
     return "Control" if r.get("correct_answer") is None else "Contradictory"
 
 # ── Load files ────────────────────────────────────────────────────────────────

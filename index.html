@@ -29,7 +29,6 @@
         .gold  { background-color: #FFC72C; color: black; }
         .red   { background-color: #AA0000; color: white; }
         .green { background-color: #008000; color: white; }
-        .gray  { background-color: #555; color: white; }
         .hidden { display: none; }
         input, select {
             padding: 10px; font-size: 16px; border-radius: 6px;
@@ -44,12 +43,6 @@
             height: 100%; width: 0%; background-color: #FFC72C;
             border-radius: 15px; text-align: center; line-height: 25px;
             font-weight: bold; color: black; transition: width 0.3s ease-in-out;
-        }
-        .pulse { animation: pulse 1s infinite; }
-        @keyframes pulse {
-            0%   { box-shadow: 0 0 5px #FFC72C; }
-            50%  { box-shadow: 0 0 20px #FFC72C; }
-            100% { box-shadow: 0 0 5px #FFC72C; }
         }
         .demo-section {
             background: #1e1e1e; border: 1px solid #333;
@@ -67,14 +60,6 @@
             display: flex; justify-content: center;
             gap: 10px; flex-wrap: wrap; margin-top: 6px;
         }
-        .scale-btn {
-            width: 48px; height: 48px; padding: 0; font-size: 15px;
-            border-radius: 8px; background: #555; color: white;
-            border: 2px solid transparent; cursor: pointer;
-            transition: all 0.15s; font-weight: bold;
-        }
-        .scale-btn:hover { transform: scale(1.1); opacity: 0.9; }
-        .scale-btn.selected { background: #FFC72C; color: black; border-color: #e6a800; }
         .scale-labels {
             display: flex; justify-content: space-between;
             font-size: 12px; color: #aaa; margin-top: 5px; padding: 0 4px;
@@ -89,7 +74,6 @@
             font-size: 14px; transition: all 0.15s; user-select: none;
         }
         .chip:hover { border-color: #FFC72C; color: white; }
-        .chip.selected { background: #FFC72C; color: black; border-color: #e6a800; font-weight: bold; }
         #demo-error { color: #ff6b6b; font-size: 14px; margin-top: 10px; min-height: 20px; }
     </style>
 </head>
