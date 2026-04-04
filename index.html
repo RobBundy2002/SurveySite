@@ -185,19 +185,53 @@
 <script>
 
     const answerKey = {
-        "I finally got the research grant I've been stressing over! 🥂": "positive",
-        "My laptop just blue-screened in the middle of a 2-hour exam. 💀": "negative",
-        "The professor just gave me an extension without me even asking. 😇": "positive",
-        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡": "negative",
-        "Seeing my name on the final graduation list feels so surreal. ✨": "positive",
-        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫": "negative",
-        "Someone just left a huge dent in my car and didn't leave a note. 🤬": "negative",
-        "The curve on the midterm was so generous that I actually passed. 😮‍💨": "positive",
-        "I just found out my favorite professor is retiring this semester. 💔": "negative",
-        "That feeling when you submit the final paper of your degree. 🌊": "positive"
+        "I finally got the research grant I've been stressing over! 🥂":                              "positive",
+        "My laptop just blue-screened in the middle of a 2-hour exam. 💀":                            "negative",
+        "The professor just gave me an extension without me even asking. 😇":                          "positive",
+        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡":             "negative",
+        "Seeing my name on the final graduation list feels so surreal. ✨":                            "positive",
+        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫":                  "negative",
+        "Someone just left a huge dent in my car and didn't leave a note. 🤬":                        "negative",
+        "The curve on the midterm was so generous that I actually passed. 😮‍💨":                       "positive",
+        "I just found out my favorite professor is retiring this semester. 💔":                        "negative",
+        "That feeling when you submit the final paper of your degree. 🌊":                             "positive",
+
+        "My advisor hasn't responded to my emails in three weeks. 😌":                                "negative",
+        "I've been rereading the same paragraph for the last hour. 😇":                              "negative",
+        "I just found out my ex is in two of my classes next semester. 🤩":                          "negative",
+        "My group stopped texting me after the disagreement and finished the project without me. 🤗": "negative",
+        "I cried less today than yesterday so I think I'm getting over it! 😢":                      "negative",
+        "I finally got the internship I actually wanted. 😐":                                         "positive",
+        "My professor pulled me aside to tell me my research proposal was exceptional. 😶":           "positive",
+        "I just found out I'm the only one in my friend group who got into the program. 😬":          "positive",
+        "I paid off my credit card for the first time since freshman year. 🙁":                       "positive",
+        "My thesis defense got moved up because my committee thinks it's ready. 😰":                  "positive",
+
+        "I passed all four of my finals and finished the semester with a 3.9 GPA.":                   null,
+        "The professor pulled me aside to say my essay was the best she had read all year.":           null,
+        "I got into the graduate program I applied to on my first try.":                               null,
+        "My research paper was accepted for publication in the department journal.":                   null,
+        "I found out I received a full scholarship for my final year of school.":                      null,
+        "I failed the midterm by fifteen points and it dropped my grade to a D.":                      null,
+        "My laptop crashed the night before my thesis was due and I lost everything I had not backed up.": null,
+        "I was dropped from the course due to an administrative error and lost my spot permanently.":  null,
+        "I studied for the wrong exam and had nothing to write for the first hour of the test.":       null,
+        "My group submitted the project without my section and I received a zero for the assignment.": null,
     };
 
-    let congruent = Object.keys(answerKey);
+    let congruent = [
+        "I finally got the research grant I've been stressing over! 🥂",
+        "My laptop just blue-screened in the middle of a 2-hour exam. 💀",
+        "The professor just gave me an extension without me even asking. 😇",
+        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡",
+        "Seeing my name on the final graduation list feels so surreal. ✨",
+        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫",
+        "Someone just left a huge dent in my car and didn't leave a note. 🤬",
+        "The curve on the midterm was so generous that I actually passed. 😮‍💨",
+        "I just found out my favorite professor is retiring this semester. 💔",
+        "That feeling when you submit the final paper of your degree. 🌊"
+    ];
+
     let contradictory = [
         "My advisor hasn't responded to my emails in three weeks. 😌",
         "I've been rereading the same paragraph for the last hour. 😇",
@@ -223,6 +257,7 @@
         "I studied for the wrong exam and had nothing to write for the first hour of the test.",
         "My group submitted the project without my section and I received a zero for the assignment."
     ];
+
 
     let participantID = "";
     let questions = [...congruent, ...contradictory, ...control].sort(() => Math.random() - 0.5);
