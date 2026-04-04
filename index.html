@@ -75,6 +75,11 @@
         }
         .chip:hover { border-color: #FFC72C; color: white; }
         #demo-error { color: #ff6b6b; font-size: 14px; margin-top: 10px; min-height: 20px; }
+
+        /* Selection styling fix */
+        .selected { background-color: #FFC72C !important; color: black !important; }
+        .scale-btn { background-color: #555; color: white; }
+        .resp-btn { background-color: #555; color: white; }
     </style>
 </head>
 <body>
@@ -162,8 +167,8 @@
             <div id="progressBar" class="progress-bar">0%</div>
         </div>
         <p id="question" style="font-size:20px;"></p>
-        <button id="btn-positive" class="gold" onclick="selectResponse('positive')">Positive 👍</button>
-        <button id="btn-negative" class="red"  onclick="selectResponse('negative')">Negative 👎</button>
+        <button id="btn-positive" class="gold resp-btn" onclick="selectResponse('positive')">Positive 👍</button>
+        <button id="btn-negative" class="red resp-btn" onclick="selectResponse('negative')">Negative 👎</button>
         <div>
             <p>Confidence (1–5)</p>
             <div id="confidence"></div>
@@ -180,53 +185,19 @@
 <script>
 
     const answerKey = {
-        "I finally got the research grant I've been stressing over! 🥂":                              "positive",
-        "My laptop just blue-screened in the middle of a 2-hour exam. 💀":                            "negative",
-        "The professor just gave me an extension without me even asking. 😇":                          "positive",
-        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡":             "negative",
-        "Seeing my name on the final graduation list feels so surreal. ✨":                            "positive",
-        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫":                  "negative",
-        "Someone just left a huge dent in my car and didn't leave a note. 🤬":                        "negative",
-        "The curve on the midterm was so generous that I actually passed. 😮‍💨":                       "positive",
-        "I just found out my favorite professor is retiring this semester. 💔":                        "negative",
-        "That feeling when you submit the final paper of your degree. 🌊":                             "positive",
-
-        "My advisor hasn't responded to my emails in three weeks. 😌":                                "negative",
-        "I've been rereading the same paragraph for the last hour. 😇":                              "negative",
-        "I just found out my ex is in two of my classes next semester. 🤩":                          "negative",
-        "My group stopped texting me after the disagreement and finished the project without me. 🤗": "negative",
-        "I cried less today than yesterday so I think I'm getting over it! 😢":                      "negative",
-        "I finally got the internship I actually wanted. 😐":                                         "positive",
-        "My professor pulled me aside to tell me my research proposal was exceptional. 😶":           "positive",
-        "I just found out I'm the only one in my friend group who got into the program. 😬":          "positive",
-        "I paid off my credit card for the first time since freshman year. 🙁":                       "positive",
-        "My thesis defense got moved up because my committee thinks it's ready. 😰":                  "positive",
-
-        "I passed all four of my finals and finished the semester with a 3.9 GPA.":                   null,
-        "The professor pulled me aside to say my essay was the best she had read all year.":           null,
-        "I got into the graduate program I applied to on my first try.":                               null,
-        "My research paper was accepted for publication in the department journal.":                   null,
-        "I found out I received a full scholarship for my final year of school.":                      null,
-        "I failed the midterm by fifteen points and it dropped my grade to a D.":                      null,
-        "My laptop crashed the night before my thesis was due and I lost everything I had not backed up.": null,
-        "I was dropped from the course due to an administrative error and lost my spot permanently.":  null,
-        "I studied for the wrong exam and had nothing to write for the first hour of the test.":       null,
-        "My group submitted the project without my section and I received a zero for the assignment.": null,
+        "I finally got the research grant I've been stressing over! 🥂": "positive",
+        "My laptop just blue-screened in the middle of a 2-hour exam. 💀": "negative",
+        "The professor just gave me an extension without me even asking. 😇": "positive",
+        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡": "negative",
+        "Seeing my name on the final graduation list feels so surreal. ✨": "positive",
+        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫": "negative",
+        "Someone just left a huge dent in my car and didn't leave a note. 🤬": "negative",
+        "The curve on the midterm was so generous that I actually passed. 😮‍💨": "positive",
+        "I just found out my favorite professor is retiring this semester. 💔": "negative",
+        "That feeling when you submit the final paper of your degree. 🌊": "positive"
     };
 
-    let congruent = [
-        "I finally got the research grant I've been stressing over! 🥂",
-        "My laptop just blue-screened in the middle of a 2-hour exam. 💀",
-        "The professor just gave me an extension without me even asking. 😇",
-        "I just realized I've been muted for the last 10 minutes of my presentation. 🤡",
-        "Seeing my name on the final graduation list feels so surreal. ✨",
-        "I've had four cups of coffee and I still can't process this textbook. 😵‍💫",
-        "Someone just left a huge dent in my car and didn't leave a note. 🤬",
-        "The curve on the midterm was so generous that I actually passed. 😮‍💨",
-        "I just found out my favorite professor is retiring this semester. 💔",
-        "That feeling when you submit the final paper of your degree. 🌊"
-    ];
-
+    let congruent = Object.keys(answerKey);
     let contradictory = [
         "My advisor hasn't responded to my emails in three weeks. 😌",
         "I've been rereading the same paragraph for the last hour. 😇",
@@ -318,23 +289,27 @@
 
     function showQuestion() {
         selected = null; confidence = null; startTime = Date.now();
-        document.getElementById('btn-positive').style.outline = '';
-        document.getElementById('btn-negative').style.outline = '';
         document.getElementById('progress').innerText = 'Question ' + (current+1) + ' of ' + questions.length;
         let percent = Math.round(((current+1)/questions.length)*100);
         let bar = document.getElementById('progressBar');
         bar.style.width = percent + '%'; bar.innerText = percent + '%';
-        current === questions.length - 1 ? bar.classList.add('pulse') : bar.classList.remove('pulse');
         document.getElementById('question').innerText = questions[current];
+
+        // reset response button styles
+        document.getElementById('btn-positive').classList.remove('selected');
+        document.getElementById('btn-negative').classList.remove('selected');
+
         let confDiv = document.getElementById('confidence');
         confDiv.innerHTML = '';
+
         for (let i = 1; i <= 5; i++) {
             let btn = document.createElement('button');
-            btn.innerText = i; btn.className = 'gray';
+            btn.innerText = i;
+            btn.className = 'scale-btn';
             btn.onclick = () => {
                 confidence = i;
-                for (let b of confDiv.children) b.style.backgroundColor = '#555';
-                btn.style.backgroundColor = '#FFC72C';
+                confDiv.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
             };
             confDiv.appendChild(btn);
         }
@@ -342,9 +317,9 @@
 
     function selectResponse(resp) {
         selected = resp;
-        document.getElementById('btn-positive').style.outline = '';
-        document.getElementById('btn-negative').style.outline = '';
-        document.getElementById('btn-' + resp).style.outline = '3px solid white';
+        document.getElementById('btn-positive').classList.remove('selected');
+        document.getElementById('btn-negative').classList.remove('selected');
+        document.getElementById('btn-' + resp).classList.add('selected');
     }
 
     function nextQuestion() {
@@ -383,36 +358,15 @@
     function finish() {
         const scoredResponses = responses.filter(r => r.is_correct !== null);
         const totalScore      = responses.reduce((sum, r) => sum + r.points_earned, 0);
-        const maxPossible     = scoredResponses.length * 5;
-        const minPossible     = scoredResponses.length * -5;
         const correctCount    = scoredResponses.filter(r => r.is_correct).length;
-        const incorrectCount  = scoredResponses.filter(r => !r.is_correct).length;
         const accuracy        = scoredResponses.length > 0
             ? parseFloat((correctCount / scoredResponses.length * 100).toFixed(1))
             : 0;
-        const avgConfCorrect  = correctCount > 0
-            ? parseFloat((scoredResponses.filter(r => r.is_correct).reduce((s,r) => s + r.confidence, 0) / correctCount).toFixed(2))
-            : null;
-        const avgConfWrong    = incorrectCount > 0
-            ? parseFloat((scoredResponses.filter(r => !r.is_correct).reduce((s,r) => s + r.confidence, 0) / incorrectCount).toFixed(2))
-            : null;
-        const calibration     = (avgConfWrong !== null && avgConfCorrect !== null)
-            ? parseFloat((avgConfWrong - avgConfCorrect).toFixed(2))
-            : null;
 
         const summary = {
-            participant_id:              participantID,
-            total_score:                 totalScore,
-            max_possible_score:          maxPossible,
-            min_possible_score:          minPossible,
-            scored_questions:            scoredResponses.length,
-            correct_answers:             correctCount,
-            incorrect_answers:           incorrectCount,
-            unscored_control_questions:  responses.length - scoredResponses.length,
-            accuracy_percent:            accuracy,
-            avg_confidence_when_correct: avgConfCorrect,
-            avg_confidence_when_wrong:   avgConfWrong,
-            calibration_score:           calibration,
+            participant_id: participantID,
+            total_score: totalScore,
+            accuracy_percent: accuracy
         };
 
         const output = { summary, responses };
